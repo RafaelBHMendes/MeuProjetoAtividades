@@ -33,7 +33,12 @@ export function ActivityProvider({ children }) {
   };
 
   const addActivity = async (activity) => {
-    const newActivities = [...activities, { ...activity, id: Date.now() }];
+    const newActivities = [...activities, { 
+      ...activity, 
+      id: Date.now(),
+      category: activity.category || 'outros',
+      priority: activity.priority || 'media' // Prioridade padrão
+    }];
     await saveActivities(newActivities);
   };
 
@@ -49,6 +54,14 @@ export function ActivityProvider({ children }) {
     await saveActivities(newActivities);
   };
 
+  const getActivitiesByCategory = (categoryId) => {
+    return activities.filter(act => act.category === categoryId);
+  };
+
+  const getActivitiesByPriority = (priorityId) => {
+    return activities.filter(act => act.priority === priorityId);
+  };
+
   return (
     <ActivityContext.Provider 
       value={{
@@ -56,6 +69,8 @@ export function ActivityProvider({ children }) {
         addActivity,
         updateActivity,
         deleteActivity,
+        getActivitiesByCategory,
+        getActivitiesByPriority
       }}
     >
       {children}

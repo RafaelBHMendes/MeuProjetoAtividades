@@ -7,16 +7,22 @@ import {
   Text,
   Button,
   Divider,
-  useTheme
+  useTheme,
+  Chip
 } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useActivities } from '../contexts/ActivityContext';
+import { CATEGORIES } from '../constants/categories';
+import { PRIORITIES } from '../constants/priorities';
 import Toast from 'react-native-toast-message';
 
 export default function DetailsScreen({ navigation, route }) {
   const { activity } = route.params;
   const theme = useTheme();
   const { deleteActivity } = useActivities();
+
+  const category = CATEGORIES.find(cat => cat.id === activity.category) || CATEGORIES.find(cat => cat.id === 'outros');
+  const priority = PRIORITIES.find(p => p.id === activity.priority) || PRIORITIES[1];
 
   const handleDelete = async () => {
     await deleteActivity(activity.id);
@@ -29,9 +35,9 @@ export default function DetailsScreen({ navigation, route }) {
     navigation.goBack();
   };
 
-  const InfoItem = ({ icon, label, value }) => (
+  const InfoItem = ({ icon, label, value, color }) => (
     <View style={styles.infoContainer}>
-      <MaterialIcons name={icon} size={24} color={theme.colors.primary} />
+      <MaterialIcons name={icon} size={24} color={color || theme.colors.primary} />
       <View style={styles.infoTextContainer}>
         <Text style={styles.infoLabel}>{label}</Text>
         <Text style={styles.infoValue}>{value}</Text>
@@ -41,7 +47,7 @@ export default function DetailsScreen({ navigation, route }) {
 
   return (
     <ScrollView style={styles.container}>
-      <Surface style={styles.surface}>
+      <Surface style={[styles.surface, { borderTopWidth: 4, borderTopColor: category.color }]}>
         <Title style={styles.title}>Detalhes da Atividade</Title>
 
         <InfoItem
@@ -56,6 +62,34 @@ export default function DetailsScreen({ navigation, route }) {
           label="Responsável"
           value={activity.responsible}
         />
+        <Divider style={styles.divider} />
+
+        <View style={styles.infoContainer}>
+          <MaterialIcons name={category.icon} size={24} color={category.color} />
+          <View style={styles.infoTextContainer}>
+            <Text style={styles.infoLabel}>Categoria</Text>
+            <Chip
+              style={[styles.categoryChip, { backgroundColor: category.color }]}
+              textStyle={styles.categoryChipText}
+            >
+              {category.name}
+            </Chip>
+          </View>
+        </View>
+        <Divider style={styles.divider} />
+
+        <View style={styles.infoContainer}>
+          <MaterialIcons name={priority.icon} size={24} color={priority.color} />
+          <View style={styles.infoTextContainer}>
+            <Text style={styles.infoLabel}>Prioridade</Text>
+            <Chip
+              style={[styles.categoryChip, { backgroundColor: priority.color }]}
+              textStyle={styles.categoryChipText}
+            >
+              {priority.name}
+            </Chip>
+          </View>
+        </View>
         <Divider style={styles.divider} />
 
         <InfoItem
@@ -138,4 +172,10 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
   },
+  categoryChip: {
+    marginTop: 4,
+  },
+  categoryChipText: {
+    color: '#fff',
+  }
 });

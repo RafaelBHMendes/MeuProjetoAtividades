@@ -8,13 +8,16 @@ import {
   Title,
   HelperText,
   useTheme,
-  Text
+  Text,
+  Chip
 } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Toast from 'react-native-toast-message';
 import moment from 'moment';
 import { useActivities } from '../contexts/ActivityContext';
+import { CATEGORIES } from '../constants/categories';
+import { PRIORITIES } from '../constants/priorities';
 
 export default function EditActivityScreen({ navigation, route }) {
   const { activity } = route.params;
@@ -22,7 +25,9 @@ export default function EditActivityScreen({ navigation, route }) {
   const { updateActivity } = useActivities();
   const [form, setForm] = useState({
     ...activity,
-    date: moment(activity.date, 'DD/MM/YYYY').toDate()
+    date: moment(activity.date, 'DD/MM/YYYY').toDate(),
+    category: activity.category || 'outros',
+    priority: activity.priority || 'media'
   });
   const [errors, setErrors] = useState({});
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -115,6 +120,60 @@ export default function EditActivityScreen({ navigation, route }) {
         <HelperText type="error" visible={!!errors.responsible}>
           {errors.responsible}
         </HelperText>
+
+        <View style={styles.categoriesContainer}>
+          <Text style={styles.categoryLabel}>Categoria</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesScroll}>
+            {CATEGORIES.map((category) => (
+              <Chip
+                key={category.id}
+                selected={form.category === category.id}
+                onPress={() => updateField('category', category.id)}
+                style={[
+                  styles.categoryChip,
+                  form.category === category.id && { backgroundColor: category.color }
+                ]}
+                textStyle={form.category === category.id ? styles.selectedCategoryText : null}
+                icon={() => (
+                  <MaterialIcons
+                    name={category.icon}
+                    size={20}
+                    color={form.category === category.id ? '#fff' : category.color}
+                  />
+                )}
+              >
+                {category.name}
+              </Chip>
+            ))}
+          </ScrollView>
+        </View>
+
+        <View style={styles.categoriesContainer}>
+          <Text style={styles.categoryLabel}>Prioridade</Text>
+          <View style={styles.prioritiesContainer}>
+            {PRIORITIES.map((priority) => (
+              <Chip
+                key={priority.id}
+                selected={form.priority === priority.id}
+                onPress={() => updateField('priority', priority.id)}
+                style={[
+                  styles.priorityChip,
+                  form.priority === priority.id && { backgroundColor: priority.color }
+                ]}
+                textStyle={form.priority === priority.id ? styles.selectedCategoryText : null}
+                icon={() => (
+                  <MaterialIcons
+                    name={priority.icon}
+                    size={20}
+                    color={form.priority === priority.id ? '#fff' : priority.color}
+                  />
+                )}
+              >
+                {priority.name}
+              </Chip>
+            ))}
+          </View>
+        </View>
 
         <TouchableOpacity 
           onPress={() => setShowDatePicker(true)}
@@ -218,4 +277,31 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     backgroundColor: '#fff',
   },
+  categoriesContainer: {
+    marginVertical: 16,
+  },
+  categoryLabel: {
+    fontSize: 16,
+    marginBottom: 8,
+    color: '#666',
+  },
+  categoriesScroll: {
+    flexDirection: 'row',
+  },
+  categoryChip: {
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  selectedCategoryText: {
+    color: '#fff',
+  },
+  prioritiesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  priorityChip: {
+    marginRight: 8,
+    marginBottom: 8,
+    minWidth: 100,
+  }
 });
